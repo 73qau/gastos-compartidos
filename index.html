@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gastos compartidos</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f5f3;
+    --surface: #ffffff;
+    --surface-1: #f0efec;
+    --border: rgba(0,0,0,0.12);
+    --border-strong: rgba(0,0,0,0.22);
+    --text-primary: #1a1a18;
+    --text-secondary: #6b6b67;
+    --text-muted: #a0a09b;
+    --accent: #2563eb;
+    --accent-bg: #eff6ff;
+    --accent-border: #bfdbfe;
+    --accent-text: #1d4ed8;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+    --danger-border: #fecaca;
+    --success-bg: #f0fdf4;
+    --success-border: #bbf7d0;
+    --radius: 8px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --surface: #2a2a27;
+      --surface-1: #232320;
+      --border: rgba(255,255,255,0.1);
+      --border-strong: rgba(255,255,255,0.2);
+      --text-primary: #f0efe9;
+      --text-secondary: #a0a09b;
+      --text-muted: #6b6b67;
+      --accent: #60a5fa;
+      --accent-bg: #1e3a5f;
+      --accent-border: #2563eb;
+      --accent-text: #93c5fd;
+      --danger: #f87171;
+      --danger-bg: #450a0a;
+      --danger-border: #7f1d1d;
+      --success-bg: #052e16;
+      --success-border: #14532d;
+    }
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 1.5rem 1rem 4rem;
+  }
+
+  .container {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: .75rem;
+  }
+
+  .label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  input[type=text], input[type=number], select {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-family: var(--font);
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color .15s;
+  }
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-bg);
+  }
+
+  button {
+    font-family: var(--font);
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background .12s;
+  }
+  button:hover { background: var(--surface-1); }
+  button:active { opacity: .8; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    width: 100%;
+    font-weight: 500;
+  }
+  .btn-primary:hover { opacity: .9; background: var(--accent); }
+
+  .btn-small { font-size: 13px; padding: 5px 12px; }
+
+  .row { display: flex; gap: 8px; align-items: center; }
+
+  .people-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 28px;
+    margin-bottom: 10px;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    background: var(--accent-bg);
+    color: var(--accent-text);
+    border: 0.5px solid var(--accent-border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .tag:hover { opacity: .75; }
+
+  .payer-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .payer-row select { flex: 1; min-width: 0; width: auto; }
+  .payer-row input { width: 100px; flex: none; }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .del-btn:hover { color: var(--danger); background: none; }
+
+  .exp-card {
+    background: var(--surface-1);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: .65rem .9rem;
+    margin-bottom: 8px;
+  }
+  .exp-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .exp-name { font-size: 14px; font-weight: 500; }
+  .exp-amt { font-size: 14px; font-weight: 500; color: var(--accent-text); white-space: nowrap; }
+  .exp-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  .result-card {
+    border-radius: var(--radius);
+    padding: .75rem 1rem;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .owe { background: var(--danger-bg); border: 0.5px solid var(--danger-border); }
+  .balanced { background: var(--success-bg); border: 0.5px solid var(--success-border); }
+  .r-names { font-size: 14px; font-weight: 500; }
+  .r-sub { font-size: 12px; color: var(--danger); margin-top: 1px; }
+  .r-amt { font-size: 15px; font-weight: 500; color: var(--danger); white-space: nowrap; }
+
+  .empty { font-size: 13px; color: var(--text-muted); text-align: center; padding: .5rem 0; }
+  .err { font-size: 12px; color: var(--danger); min-height: 16px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Gastos compartidos</h1>
+  <p class="subtitle">Registra quién pagó qué y descubre cuánto se deben entre sí.</p>
+
+  <!-- Personas -->
+  <div class="card">
+    <div class="section-title">Personas</div>
+    <div class="people-wrap" id="people-tags">
+      <span class="empty">Sin personas aún</span>
+    </div>
+    <div class="row">
+      <input type="text" id="person-input" placeholder="Nombre" maxlength="24" style="flex:1" />
+      <button class="btn-small" onclick="addPerson()">Agregar</button>
+    </div>
+    <div class="err" id="person-err"></div>
+  </div>
+
+  <!-- Registrar gasto -->
+  <div class="card">
+    <div class="section-title">Registrar gasto</div>
+    <label class="label" for="exp-desc">Descripción</label>
+    <input type="text" id="exp-desc" placeholder="Ej: mercado, taxi, restaurante…" style="margin-bottom:12px" />
+    <span class="label">Pagadores</span>
+    <div id="payer-rows"></div>
+    <button class="btn-small" onclick="addPayerRow()" style="margin-bottom:12px">+ otro pagador</button>
+    <button class="btn-primary" onclick="addExpense()">Registrar gasto</button>
+    <div class="err" id="exp-err"></div>
+  </div>
+
+  <!-- Gastos -->
+  <div class="card">
+    <div class="section-title">Gastos registrados</div>
+    <div id="exp-list"><p class="empty">Sin gastos aún</p></div>
+  </div>
+
+  <!-- Resultados -->
+  <div class="card">
+    <div class="section-title">¿Quién le debe a quién?</div>
+    <div id="results"><p class="empty">Agrega personas y gastos para ver las cuentas</p></div>
+  </div>
+</div>
+
+<script>
+var people = [];
+var expenses = [];
+var prId = 0;
+
+function fmt(n){
+  return '$' + Math.round(n).toLocaleString('es-CO');
+}
+
+function addPerson(){
+  var inp = document.getElementById('person-input');
+  var err = document.getElementById('person-err');
+  var name = inp.value.trim();
+  if(!name){ err.textContent = 'Escribe un nombre'; return; }
+  if(people.indexOf(name) >= 0){ err.textContent = 'Ya existe'; return; }
+  err.textContent = '';
+  people.push(name);
+  inp.value = '';
+  renderPeople();
+  refreshPayerSelects();
+  compute();
+}
+
+function removePerson(name){
+  people = people.filter(function(p){ return p !== name; });
+  renderPeople();
+  refreshPayerSelects();
+  compute();
+}
+
+function renderPeople(){
+  var el = document.getElementById('people-tags');
+  if(people.length === 0){
+    el.innerHTML = '<span class="empty">Sin personas aún</span>';
+    return;
+  }
+  el.innerHTML = people.map(function(p){
+    return '<span class="tag" onclick="removePerson(\'' + p + '\')">' + p + ' ×</span>';
+  }).join('');
+}
+
+function removePayerRow(id){
+  var row = document.getElementById('pr-' + id);
+  if(row) row.parentNode.removeChild(row);
+}
+
+function addPayerRow(){
+  if(people.length === 0) return;
+  prId++;
+  var id = prId;
+  var opts = people.map(function(p){ return '<option>' + p + '</option>'; }).join('');
+  var div = document.createElement('div');
+  div.className = 'payer-row';
+  div.id = 'pr-' + id;
+
+  var sel = document.createElement('select');
+  sel.id = 'ps-' + id;
+  sel.innerHTML = opts;
+
+  var inp = document.createElement('input');
+  inp.type = 'number';
+  inp.id = 'pa-' + id;
+  inp.placeholder = '$ monto';
+  inp.min = '0';
+  inp.step = '1';
+  inp.style.width = '100px';
+
+  var btn = document.createElement('button');
+  btn.className = 'del-btn';
+  btn.textContent = '×';
+  btn.setAttribute('aria-label', 'Quitar pagador');
+  btn.addEventListener('click', function(){ removePayerRow(id); });
+
+  div.appendChild(sel);
+  div.appendChild(inp);
+  div.appendChild(btn);
+  document.getElementById('payer-rows').appendChild(div);
+}
+
+function refreshPayerSelects(){
+  var rows = document.querySelectorAll('[id^="pr-"]');
+  rows.forEach(function(row){
+    var id = row.id.replace('pr-', '');
+    var sel = document.getElementById('ps-' + id);
+    if(!sel) return;
+    var cur = sel.value;
+    sel.innerHTML = people.map(function(p){
+      return '<option' + (p === cur ? ' selected' : '') + '>' + p + '</option>';
+    }).join('');
+  });
+  if(document.querySelectorAll('[id^="pr-"]').length === 0 && people.length > 0){
+    addPayerRow();
+  }
+}
+
+function addExpense(){
+  var err = document.getElementById('exp-err');
+  var desc = document.getElementById('exp-desc').value.trim();
+  if(!desc){ err.textContent = 'Escribe una descripción'; return; }
+  var rows = document.querySelectorAll('[id^="pr-"]');
+  if(rows.length === 0){ err.textContent = 'Agrega al menos un pagador'; return; }
+  var payments = [];
+  var ok = true;
+  rows.forEach(function(row){
+    var id = row.id.replace('pr-', '');
+    var sel = document.getElementById('ps-' + id);
+    var inp = document.getElementById('pa-' + id);
+    if(!sel || !inp){ return; }
+    var who = sel.value;
+    var amt = parseFloat(inp.value);
+    if(!who || isNaN(amt) || amt <= 0){ ok = false; return; }
+    payments.push({ who: who, amt: amt });
+  });
+  if(!ok || payments.length === 0){ err.textContent = 'Revisa los montos — deben ser mayores a 0'; return; }
+  err.textContent = '';
+  expenses.push({ desc: desc, payments: payments });
+  document.getElementById('exp-desc').value = '';
+  document.getElementById('payer-rows').innerHTML = '';
+  addPayerRow();
+  renderExpenses();
+  compute();
+}
+
+function removeExpense(i){
+  expenses.splice(i, 1);
+  renderExpenses();
+  compute();
+}
+
+function renderExpenses(){
+  var el = document.getElementById('exp-list');
+  if(expenses.length === 0){ el.innerHTML = '<p class="empty">Sin gastos aún</p>'; return; }
+  el.innerHTML = expenses.map(function(e, i){
+    var total = e.payments.reduce(function(s, p){ return s + p.amt; }, 0);
+    var payers = e.payments.map(function(p){ return p.who + ': ' + fmt(p.amt); }).join(' · ');
+    return '<div class="exp-card">'
+      + '<div class="exp-top">'
+      + '<div><div class="exp-name">' + e.desc + '</div><div class="exp-meta">' + payers + '</div></div>'
+      + '<div style="display:flex;align-items:center;gap:6px">'
+      + '<span class="exp-amt">' + fmt(total) + '</span>'
+      + '<button class="del-btn" onclick="removeExpense(' + i + ')">×</button>'
+      + '</div></div></div>';
+  }).join('');
+}
+
+function compute(){
+  var el = document.getElementById('results');
+  if(people.length < 2 || expenses.length === 0){
+    el.innerHTML = '<p class="empty">Agrega personas y gastos para ver las cuentas</p>';
+    return;
+  }
+  var balance = {};
+  people.forEach(function(p){ balance[p] = 0; });
+  expenses.forEach(function(e){
+    var total = e.payments.reduce(function(s, p){ return s + p.amt; }, 0);
+    var share = total / people.length;
+    people.forEach(function(p){ balance[p] -= share; });
+    e.payments.forEach(function(p){ balance[p.who] += p.amt; });
+  });
+  var creds = people.filter(function(p){ return balance[p] > 0.5; }).map(function(p){ return { name: p, amt: balance[p] }; });
+  var debts = people.filter(function(p){ return balance[p] < -0.5; }).map(function(p){ return { name: p, amt: -balance[p] }; });
+  creds.sort(function(a, b){ return b.amt - a.amt; });
+  debts.sort(function(a, b){ return b.amt - a.amt; });
+  var txns = [], ci = 0, di = 0;
+  while(ci < creds.length && di < debts.length){
+    var amt = Math.min(creds[ci].amt, debts[di].amt);
+    if(amt > 0.5) txns.push({ from: debts[di].name, to: creds[ci].name, amt: amt });
+    creds[ci].amt -= amt; debts[di].amt -= amt;
+    if(creds[ci].amt < 0.5) ci++;
+    if(debts[di].amt < 0.5) di++;
+  }
+  if(txns.length === 0){
+    el.innerHTML = '<div class="result-card balanced"><span class="r-names">¡Todos a mano! ✓</span></div>';
+    return;
+  }
+  el.innerHTML = txns.map(function(t){
+    return '<div class="result-card owe">'
+      + '<div><div class="r-names">' + t.from + ' → ' + t.to + '</div>'
+      + '<div class="r-sub">' + t.from + ' le debe a ' + t.to + '</div></div>'
+      + '<div class="r-amt">' + fmt(t.amt) + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+document.getElementById('person-input').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') addPerson();
+});
+
+renderPeople();
+compute();
+</script>
+</body>
+</html>
